@@ -2,7 +2,7 @@
 
 **Give your product a cloud AI agent, without building the agent infrastructure.**
 
-An agent skill and a runnable TypeScript quickstart for building an *agent harness* on
+An agent skill and a runnable TypeScript quickstart for building an _agent harness_ on
 [Buda API Claws](https://buda.im/en/docs/developers/api-claws) — the hosted Agent API where the
 runtime, durable memory, sessions, and tenant isolation are already operated for you.
 
@@ -15,18 +15,18 @@ isolated context per end user, and a boundary between customers.
 Building all of that is weeks of work. API Claws hosts it — so the harness you write is the thin
 part, the part that knows your users and your product:
 
-| Harness part | Who owns it |
-| --- | --- |
-| Model access, provider switching, keys | API Claws |
-| Agent runtime, tool sandboxing | API Claws |
-| Durable memory / knowledge base | API Claws (Drive) |
-| Session and context management | API Claws |
-| Tenant isolation | API Claws (Spaces) |
-| Wake/sleep of idle agents | API Claws |
-| **Identity mapping** — your user → a session | **You** |
-| **Turn loop** — send, poll, render | **You** |
-| **Knowledge writes** — what your product learns | **You** |
-| **Surface** — UI, voice, chat, webhook | **You** |
+| Harness part                                    | Who owns it        |
+| ----------------------------------------------- | ------------------ |
+| Model access, provider switching, keys          | API Claws          |
+| Agent runtime, tool sandboxing                  | API Claws          |
+| Durable memory / knowledge base                 | API Claws (Drive)  |
+| Session and context management                  | API Claws          |
+| Tenant isolation                                | API Claws (Spaces) |
+| Wake/sleep of idle agents                       | API Claws          |
+| **Identity mapping** — your user → a session    | **You**            |
+| **Turn loop** — send, poll, render              | **You**            |
+| **Knowledge writes** — what your product learns | **You**            |
+| **Surface** — UI, voice, chat, webhook          | **You**            |
 
 Four rows. That is the whole job, and this repo walks through each one.
 
@@ -78,6 +78,22 @@ token — six checks, one command.
 Then `pnpm chat` for the turn loop with a human in it, and `pnpm embed` for the two ways to reach
 a frontend that cannot hold your API key.
 
+## Run the full WebApp example
+
+[`examples/smartwatch-companion`](examples/smartwatch-companion) is a complete Next.js product
+example. It gives each app user a private training Agent with its own Drive, Sessions, and a
+scheduled weekly review. The smartwatch remains connected to the existing app; the app server
+sends approved workout data to API Claws.
+
+It runs without credentials in deterministic preview mode, or against the real API when
+`BUDA_API_KEY` and `BUDA_SPACE_ID` are configured:
+
+```bash
+cd examples/smartwatch-companion
+npm install
+npm run dev
+```
+
 ## What is inside
 
 ```
@@ -94,6 +110,8 @@ skills/api-claws-creator/
         ├── demo.ts                   the six checks
         ├── chat.ts                   interactive terminal chat
         └── embed.ts                  frontend-safe access, both paths
+examples/
+└── smartwatch-companion/             full Next.js Agent-per-user product example
 ```
 
 ## Three things that will save you a day

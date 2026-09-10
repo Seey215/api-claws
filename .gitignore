@@ -1,4 +1,9 @@
 node_modules/
+.next/
+.data/
+coverage/
+examples/smartwatch-companion/AGENTS.md
+examples/smartwatch-companion/CLAUDE.md
 .env
 .env.*
 !.env.example

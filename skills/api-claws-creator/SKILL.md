@@ -15,21 +15,32 @@ knows your users, your product, and your surface.
 
 ## What you build vs. what API Claws hosts
 
-| Harness part | Who owns it | Where it lives |
-| --- | --- | --- |
-| Model access, provider switching, keys | API Claws | — |
-| Agent runtime, tool sandboxing | API Claws | — |
-| Durable memory / knowledge base | API Claws | Drive (`/drive/files`) |
-| Session and context management | API Claws | Sessions (`/sessions`) |
-| Tenant isolation | API Claws | Spaces (`/spaces`) |
-| Wake/sleep of idle agents | API Claws | — |
-| **Identity mapping** — your user/device → a session | **You** | Your DB |
-| **Turn loop** — send, poll, render | **You** | Your backend |
-| **Knowledge writes** — what your product learns | **You** | Your backend → Drive |
-| **Surface** — UI, voice, chat, webhook | **You** | Your frontend/device |
-| **Credential boundary** — who may hold the `sk_` key | **You** | Backend only |
+| Harness part                                         | Who owns it | Where it lives         |
+| ---------------------------------------------------- | ----------- | ---------------------- |
+| Model access, provider switching, keys               | API Claws   | —                      |
+| Agent runtime, tool sandboxing                       | API Claws   | —                      |
+| Durable memory / knowledge base                      | API Claws   | Drive (`/drive/files`) |
+| Session and context management                       | API Claws   | Sessions (`/sessions`) |
+| Tenant isolation                                     | API Claws   | Spaces (`/spaces`)     |
+| Wake/sleep of idle agents                            | API Claws   | —                      |
+| **Identity mapping** — your user/device → a session  | **You**     | Your DB                |
+| **Turn loop** — send, poll, render                   | **You**     | Your backend           |
+| **Knowledge writes** — what your product learns      | **You**     | Your backend → Drive   |
+| **Surface** — UI, voice, chat, webhook               | **You**     | Your frontend/device   |
+| **Credential boundary** — who may hold the `sk_` key | **You**     | Backend only           |
 
 The four rows marked **You** are the entire job. Everything below is how to do them.
+
+## Reference implementation
+
+For a complete product-shaped example, read
+[`references/smartwatch-companion.md`](references/smartwatch-companion.md), then use the runnable
+[`examples/smartwatch-companion`](../../examples/smartwatch-companion) WebApp.
+
+It demonstrates an optional **one Agent per app user** mapping inside one shared Developer Space.
+Each user's Agent has its own Drive, while Sessions remain conversations below that Agent. It also
+keeps the hardware boundary explicit: the existing app syncs the watch, and the app server calls
+API Claws.
 
 ## Before you start
 
@@ -51,19 +62,19 @@ Those surfaces use short-lived embed tokens (Step 5).
 This is the one decision that is expensive to change later, because Spaces are the billing and
 isolation boundary. Decide what "one customer" means in your product, then map it:
 
-| You are building | One Space per | One Agent per |
-| --- | --- | --- |
-| Device fleet (watch, speaker, IoT) | Customer, fleet, or premium tier | Device model or assistant role |
-| Mini program / extension | Merchant, course, or end-user account | Business function (support, tutor, shopping) |
-| SaaS copilot | Customer tenant | Workflow (onboarding, reporting, support) |
-| Support widget | Brand or company | Support queue |
-| Internal tool | Department or project | Job (ops, sales, research) |
+| You are building                   | One Space per                         | One Agent per                                |
+| ---------------------------------- | ------------------------------------- | -------------------------------------------- |
+| Device fleet (watch, speaker, IoT) | Customer, fleet, or premium tier      | Device model or assistant role               |
+| Mini program / extension           | Merchant, course, or end-user account | Business function (support, tutor, shopping) |
+| SaaS copilot                       | Customer tenant                       | Workflow (onboarding, reporting, support)    |
+| Support widget                     | Brand or company                      | Support queue                                |
+| Internal tool                      | Department or project                 | Job (ops, sales, research)                   |
 
 Rules of thumb that keep you out of trouble:
 
 - Anything that must **never** see another party's data gets its own Space.
-- Anything that is just a different *role* is another Agent inside the same Space.
-- Anything that is just a different *conversation* is another Session. Do not create a Space per
+- Anything that is just a different _role_ is another Agent inside the same Space.
+- Anything that is just a different _conversation_ is another Session. Do not create a Space per
   end user unless each end user really is a paying tenant — you buy Spaces, they are not free.
 
 Write the decision down in the repo before coding. It becomes your provisioning logic.
@@ -113,7 +124,7 @@ curl -s -X PUT https://buda.im/api/v1/api-agents/<agentId>/drive/files \
 What belongs in Drive: product manuals, policies, FAQs, playbooks, SOPs, per-customer settings,
 durable user state ("this customer is on the enterprise plan, their device is model X").
 
-What does *not*: the current question, a one-off greeting, anything that changes every turn,
+What does _not_: the current question, a one-off greeting, anything that changes every turn,
 and anything you would not want retained.
 
 Organize by path (`manuals/`, `policies/`, `state/<userId>.md`) — you will be updating these
@@ -144,7 +155,7 @@ curl -s https://buda.im/api/v1/api-agents/<agentId>/sessions/<sessionId> \
 
 Session status is one of `pending`, `in_progress`, `waiting_for_input`, `completed`, `failed`,
 `cancelled`. **Stop polling on the last four** — `waiting_for_input` is a settled state that
-means the agent asked *you* something, not a failure, and code that only waits for `completed`
+means the agent asked _you_ something, not a failure, and code that only waits for `completed`
 will hang there forever.
 
 `mode` picks the behavior: `chat` for conversation, `agent` for tool-using work, `thinking` for
@@ -177,7 +188,7 @@ curl -s -X POST https://buda.im/api/v1/spaces/<spaceId>/agents/<agentId>/embed-u
 
 The token rides in the URL hash, so it is never sent to a server as part of the page request.
 
-**A mini program, mobile app, extension, or device wants its own UI.** Mint an embed *session*
+**A mini program, mobile app, extension, or device wants its own UI.** Mint an embed _session_
 instead, hand the frontend only the token, and let it call the embed endpoints:
 
 ```bash
@@ -225,7 +236,7 @@ confirm, in this order:
 4. A turn reaches a settled status and the assistant message references the Drive content —
    that proves memory is actually wired, not just uploaded.
 5. A second turn in the same session shows the agent kept context.
-6. If you built an embed surface: the frontend works holding *only* the short-lived token, and
+6. If you built an embed surface: the frontend works holding _only_ the short-lived token, and
    still works after the token is refreshed.
 
 The `quickstart/` directory in this skill does 1–5 in one command. Start there, then replace its
